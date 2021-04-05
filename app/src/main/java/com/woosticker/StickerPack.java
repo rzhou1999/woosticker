@@ -8,12 +8,14 @@ import java.io.FileFilter;
  * A "Pack" is informally represented as a File
  */
 public class StickerPack {
-    private File[] stickers;
-    public StickerPack(File packDir){
+    private final File[] stickers;
+
+    public StickerPack(File packDir) {
         // Need to filter out directories because the base directory has to have other packs'
         // directories.
         this.stickers = packDir.listFiles(new FileFilter() {
-            @Override public boolean accept(File file) {
+            @Override
+            public boolean accept(File file) {
                 return file.isFile();
             }
         });
@@ -25,8 +27,8 @@ public class StickerPack {
      *
      * @return File that should be used for thumbnail
      */
-    public File getThumbSticker(){
-        return (File) this.stickers[0];
+    public File getThumbSticker() {
+        return this.stickers[0];
     }
 
     /**
@@ -36,7 +38,7 @@ public class StickerPack {
      *
      * @return Array of Files corresponding to all stickers found in this pack
      */
-    public File[] getStickerList(){
-        return (File[]) this.stickers;
+    public File[] getStickerList() {
+        return this.stickers;
     }
 }

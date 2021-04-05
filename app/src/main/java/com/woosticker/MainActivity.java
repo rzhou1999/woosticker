@@ -24,7 +24,22 @@ import java.util.HashMap;
 public class MainActivity extends Activity {
     private final int CHOOSE_STICKER_DIR = 62519;
     private SharedPreferences sharedPref = null;
-    private HashMap<String, String> SUPPORTED_MIMES = Utils.get_supported_mimes();
+    private final HashMap<String, String> SUPPORTED_MIMES = Utils.get_supported_mimes();
+
+    /**
+     * Restart the application. See usage comment above.
+     *
+     * @param context
+     */
+    //https://stackoverflow.com/a/46848226
+    private static void triggerRebirth(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
+        ComponentName componentName = intent.getComponent();
+        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
+        context.startActivity(mainIntent);
+        Runtime.getRuntime().exit(0);
+    }
 
     /**
      * Sets up content view, shared prefs, etc.
@@ -42,7 +57,7 @@ public class MainActivity extends Activity {
     /**
      * Rereads saved sticker dir path from preferences
      */
-    private void refreshStickerDirPath(){
+    private void refreshStickerDirPath() {
         String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
 
         TextView dirStatus = findViewById(R.id.stickerDirStatus);
@@ -60,9 +75,9 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_STICKER_DIR && resultCode == Activity.RESULT_OK) {
-            if (data != null){
+            if (data != null) {
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("stickerDirPath", ((Uri) data.getData()).toString());
+                editor.putString("stickerDirPath", data.getData().toString());
                 editor.apply();
                 refreshStickerDirPath();
             }
@@ -86,9 +101,9 @@ public class MainActivity extends Activity {
      *
      * @param pack source pack
      */
-    private void importPack(DocumentFile pack){
+    private void importPack(DocumentFile pack) {
         DocumentFile[] stickers = pack.listFiles();
-        for (int i = 0; i < stickers.length; i++){
+        for (int i = 0; i < stickers.length; i++) {
             importSticker(stickers[i], pack.getName() + "/");
         }
     }
@@ -99,7 +114,7 @@ public class MainActivity extends Activity {
      * @param sticker sticker to check compatability with woosticker for
      * @return true if supported image type
      */
-    private boolean canImportSticker(DocumentFile sticker){
+    private boolean canImportSticker(DocumentFile sticker) {
         ArrayList<String> mimesToCheck = new ArrayList<String>(SUPPORTED_MIMES.keySet());
         return !(sticker.isDirectory() ||
                 !mimesToCheck.contains(Utils.getFileExtension(sticker.getName())));
@@ -109,10 +124,10 @@ public class MainActivity extends Activity {
      * Copies stickers from source to internal storage
      *
      * @param sticker sticker to copy over
-     * @param pack the pack which the sticker belongs to
+     * @param pack    the pack which the sticker belongs to
      */
-    private void importSticker(DocumentFile sticker, String pack){
-        if (!canImportSticker(sticker)){
+    private void importSticker(DocumentFile sticker, String pack) {
+        if (!canImportSticker(sticker)) {
             return;
         }
         //this path business is a little icky....
@@ -168,20 +183,5 @@ public class MainActivity extends Activity {
             }
         }
         fileOrDirectory.delete();
-    }
-
-    /**
-     * Restart the application. See usage comment above.
-     *
-     * @param context
-     */
-    //https://stackoverflow.com/a/46848226
-    private static void triggerRebirth(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
-        ComponentName componentName = intent.getComponent();
-        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-        context.startActivity(mainIntent);
-        Runtime.getRuntime().exit(0);
     }
 }

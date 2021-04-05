@@ -12,7 +12,7 @@ public final class Utils {
      *
      * @return HashMap of woosticker-supported mimes. Keys are "." inclusive.
      */
-    public static HashMap<String, String> get_supported_mimes(){
+    public static HashMap<String, String> get_supported_mimes() {
         return new HashMap<String, String>() {{
             put(".gif", "image/gif");
             put(".png", "image/png");
