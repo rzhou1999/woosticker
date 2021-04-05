@@ -10,21 +10,27 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends Activity {
     private final int CHOOSE_STICKER_DIR = 62519;
     private SharedPreferences sharedPref = null;
+    private HashMap<String, String> SUPPORTED_MIMES = Utils.get_supported_mimes();
+
+    /**
+     * Sets up content view, shared prefs, etc.
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +39,9 @@ public class MainActivity extends Activity {
         refreshStickerDirPath();
     }
 
+    /**
+     * Rereads saved sticker dir path from preferences
+     */
     private void refreshStickerDirPath(){
         String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
 
@@ -40,6 +49,13 @@ public class MainActivity extends Activity {
         dirStatus.setText(stickerDirPath);
     }
 
+    /**
+     * Handles ACTION_OPEN_DOCUMENT_TREE result and adds the returned Uri to shared prefs
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -53,22 +69,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void copyBufferedFile(BufferedInputStream bufferedInputStream,
-                                 BufferedOutputStream bufferedOutputStream)
-            throws IOException
-    {
-        try (BufferedInputStream in = bufferedInputStream;
-             BufferedOutputStream out = bufferedOutputStream)
-        {
-            byte[] buf = new byte[1024];
-            int nosRead;
-            while ((nosRead = in.read(buf)) != -1)  // read this carefully ...
-            {
-                out.write(buf, 0, nosRead);
-            }
-        }
-    }
-
+    /**
+     * Called on button press to choose a new directory
+     *
+     * @param view
+     */
     public void chooseDir(View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -76,14 +81,41 @@ public class MainActivity extends Activity {
         startActivityForResult(intent, CHOOSE_STICKER_DIR);
     }
 
-    public void importPack(DocumentFile pack){
+    /**
+     * Copies images from pack directory by calling importSticker() on all of them
+     *
+     * @param pack source pack
+     */
+    private void importPack(DocumentFile pack){
         DocumentFile[] stickers = pack.listFiles();
         for (int i = 0; i < stickers.length; i++){
             importSticker(stickers[i], pack.getName() + "/");
         }
     }
 
-    public void importSticker(DocumentFile sticker, String pack){
+    /**
+     * For each sticker, check if it is in a compatible file format with woosticker
+     *
+     * @param sticker sticker to check compatability with woosticker for
+     * @return true if supported image type
+     */
+    private boolean canImportSticker(DocumentFile sticker){
+        ArrayList<String> mimesToCheck = new ArrayList<String>(SUPPORTED_MIMES.keySet());
+        return !(sticker.isDirectory() ||
+                !mimesToCheck.contains(Utils.getFileExtension(sticker.getName())));
+    }
+
+    /**
+     * Copies stickers from source to internal storage
+     *
+     * @param sticker sticker to copy over
+     * @param pack the pack which the sticker belongs to
+     */
+    private void importSticker(DocumentFile sticker, String pack){
+        if (!canImportSticker(sticker)){
+            return;
+        }
+        //this path business is a little icky....
         File destSticker = new File(getFilesDir(), "stickers" + "/" + pack + sticker.getName());
         destSticker.getParentFile().mkdirs();
         try {
@@ -91,11 +123,16 @@ public class MainActivity extends Activity {
             Files.copy(is, destSticker.toPath());
             is.close();
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
     }
 
+    /**
+     * Called on button press to import stickers from source directory to internal storage
+     *
+     * @param view
+     */
     public void importStickers(View view) {
         File oldStickers = new File(getFilesDir(), "stickers");
         deleteRecursive(oldStickers);
@@ -119,9 +156,12 @@ public class MainActivity extends Activity {
         triggerRebirth(this);
     }
 
-    public void deleteRecursive(File fileOrDirectory) {
-
-
+    /**
+     * Delete everything from input File
+     *
+     * @param fileOrDirectory File to start deleting from
+     */
+    private void deleteRecursive(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory()) {
             for (File child : fileOrDirectory.listFiles()) {
                 deleteRecursive(child);
@@ -130,8 +170,13 @@ public class MainActivity extends Activity {
         fileOrDirectory.delete();
     }
 
+    /**
+     * Restart the application. See usage comment above.
+     *
+     * @param context
+     */
     //https://stackoverflow.com/a/46848226
-    public static void triggerRebirth(Context context) {
+    private static void triggerRebirth(Context context) {
         PackageManager packageManager = context.getPackageManager();
         Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
         ComponentName componentName = intent.getComponent();

@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import pl.droidsonroids.gif.GifDrawable;
 
@@ -40,11 +41,8 @@ public class ImageKeyboard extends InputMethodService {
 
   private static final String TAG = "ImageKeyboard";
   private static final String AUTHORITY = "com.woosticker.inputcontent";
-  private static final String MIME_TYPE_PNG = "image/png";
-  private static final String MIME_TYPE_GIF = "image/gif";
-  private boolean pngSupported;
-  private boolean gifSupported;
 
+  private Map<String, String> SUPPORTED_MIMES;
   private HashMap<String, StickerPack> loadedPacks = new HashMap<String, StickerPack>();
   private LinearLayout ImageContainer;
   private LinearLayout PackContainer;
@@ -194,11 +192,6 @@ public class ImageKeyboard extends InputMethodService {
   @Override
   public void onCreate() {
     super.onCreate();
-
-    Toast.makeText(getApplicationContext(),
-            "Reloaded woosticker",
-            Toast.LENGTH_SHORT).show();
-
     reloadPacks();
   }
 
@@ -277,23 +270,24 @@ public class ImageKeyboard extends InputMethodService {
 
   @Override
   public void onStartInputView(EditorInfo info, boolean restarting) {
-    pngSupported = isCommitContentSupported(info, MIME_TYPE_PNG);
-    gifSupported = isCommitContentSupported(info, MIME_TYPE_GIF);
+    SUPPORTED_MIMES = Utils.get_supported_mimes();
+    boolean allSupported = true;
+    String[] mimesToCheck = SUPPORTED_MIMES.keySet().toArray(new String[SUPPORTED_MIMES.size()]);
+    for(int i =0; i < mimesToCheck.length; i++){
+      boolean mimeSupported = isCommitContentSupported(info, SUPPORTED_MIMES.get(mimesToCheck[i]));
 
-    if(!pngSupported || !gifSupported) {
+      allSupported = allSupported && mimeSupported;
+      if (!mimeSupported){
+        SUPPORTED_MIMES.remove(mimesToCheck[i]);
+      }
+
+    }
+
+    if(!allSupported) {
       Toast.makeText(getApplicationContext(),
           "One or more image formats not supported here. Some stickers may not send correctly.",
           Toast.LENGTH_SHORT).show();
     }
-  }
-
-  private String getFileExtension(File file) {
-    String name = file.getName();
-    int lastIndexOf = name.lastIndexOf(".");
-    if (lastIndexOf == -1) {
-      return "";
-    }
-    return name.substring(lastIndexOf);
   }
 
   private void recreateImageContainer(StickerPack pack) {
@@ -310,7 +304,7 @@ public class ImageKeyboard extends InputMethodService {
       }
 
       CardView ImageCard = (CardView) getLayoutInflater().inflate(R.layout.sticker_card, ImageContainerColumn, false);
-      ImageButton ImgButton = (ImageButton) ImageCard.findViewById(R.id.ib3);
+      ImageButton ImgButton = ImageCard.findViewById(R.id.ib3);
       ImgButton.setImageDrawable(getDrawableFromFile(stickers[i]));
       ImgButton.setTag(stickers[i]);
       ImgButton.setOnClickListener(new View.OnClickListener() {
@@ -318,31 +312,13 @@ public class ImageKeyboard extends InputMethodService {
         public void onClick(View view) {
           final File file = (File) view.getTag();
 
-          String stickerType;
-          switch(getFileExtension(file)){
-            case ".png":
-              if (!pngSupported){
-                Toast.makeText(getApplicationContext(),
-                        ".png not supported.",
-                        Toast.LENGTH_SHORT).show();
-                return;
-              }
-              stickerType = MIME_TYPE_PNG;
-              break;
-            case ".gif":
-              if (!gifSupported){
-                Toast.makeText(getApplicationContext(),
-                        ".gif not supported.",
-                        Toast.LENGTH_SHORT).show();
-                return;
-              }
-              stickerType = MIME_TYPE_GIF;
-              break;
-            default:
-              Toast.makeText(getApplicationContext(),
-                      getFileExtension(file) + " not supported by woosticker.",
-                      Toast.LENGTH_SHORT).show();
-              return;
+          String stickerType = SUPPORTED_MIMES.get(Utils.getFileExtension(file.getName()));
+
+          if (stickerType == null){
+            Toast.makeText(getApplicationContext(),
+                    Utils.getFileExtension(file.getName()) + " not supported here.",
+                    Toast.LENGTH_SHORT).show();
+            return;
           }
 
           ImageKeyboard.this.doCommitContent(file.getName(), stickerType, file);
