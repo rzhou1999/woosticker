@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    >
+
+    <TextView
+        android:id="@+id/stickerDirStatusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Current sticker directory:" />
+
+    <TextView
+        android:id="@+id/stickerDirStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="" />
+
+    <Button
+        android:id="@+id/chooseStickerDir"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose a new sticker source directory"
+        android:onClick="chooseDir" />
+
+    <Button
+        android:id="@+id/importStickers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Import stickers to woosticker"
+        android:onClick="importStickers" />
+
+
+</LinearLayout>
