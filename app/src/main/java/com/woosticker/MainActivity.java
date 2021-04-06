@@ -1,15 +1,16 @@
 package com.woosticker;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.documentfile.provider.DocumentFile;
@@ -20,7 +21,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 
 public class MainActivity extends Activity {
@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
             return 0;
         }
         //this path business is a little icky....
-        File destSticker = new File(getFilesDir(), "stickers" + "/" + pack + sticker.getName());
+        File destSticker = new File(getFilesDir(), "stickers/" + pack + sticker.getName());
         destSticker.getParentFile().mkdirs();
         try {
             InputStream is = getContentResolver().openInputStream(sticker.getUri());
@@ -108,33 +108,8 @@ public class MainActivity extends Activity {
      * Import files from storage to internal directory
      */
     public void importStickers() {
-        File oldStickers = new File(getFilesDir(), "stickers");
-        deleteRecursive(oldStickers);
-        int stickersInDir = 0;
-        //could pass path as parameter, but we save it for the textbox anyways
-        String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
-        if (!stickerDirPath.equals("none set")) {
-            DocumentFile tree = DocumentFile.fromTreeUri(this, Uri.parse(stickerDirPath));
-
-            DocumentFile[] files = tree.listFiles();
-
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isFile())
-                    stickersInDir += importSticker(files[i], "");
-                if (files[i].isDirectory())
-                    stickersInDir += importPack(files[i]);
-            }
-        }
-
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("numStickersImported", stickersInDir);
-        //If triggerRebirth() is used, need to synchronously write to persistent storage
-        editor.commit();
-        refreshStickerDirPath();
-
-        //Inelegant, but the easiest way I could guarantee the pack/image reloading to be triggered
-        //when an import is performed. Maybe should just decouple it from onCreate()....
-        triggerRebirth(this);
+        //Use worker thread because this takes several seconds
+        new FSCopyTask().execute(this);
     }
 
     /**
@@ -182,21 +157,64 @@ public class MainActivity extends Activity {
 
         TextView dirStatus = findViewById(R.id.stickerDirStatus);
         dirStatus.setText(stickerDirPath + " on " + lastUpdateDate + " with " +
-                String.valueOf(numStickersImported) + " stickers loaded.");
+                numStickersImported + " stickers loaded.");
     }
 
     /**
-     * Restart the application. See usage comment above.
-     *
-     * @param context
+     * AsyncTask to handle file copying
      */
-    //https://stackoverflow.com/a/46848226
-    private static void triggerRebirth(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-        Intent intent = packageManager.getLaunchIntentForPackage(context.getPackageName());
-        ComponentName componentName = intent.getComponent();
-        Intent mainIntent = Intent.makeRestartActivityTask(componentName);
-        context.startActivity(mainIntent);
-        Runtime.getRuntime().exit(0);
+    private class FSCopyTask extends AsyncTask<Context, Void, Integer> {
+
+        /**
+         * @param params should include a single Context
+         * @return the number of stickers successfully added
+         */
+        protected Integer doInBackground(Context... params) {
+            Context context = params[0];
+            File oldStickers = new File(getFilesDir(), "stickers");
+            deleteRecursive(oldStickers);
+            int stickersInDir = 0;
+            //could pass path as parameter, but we save it for the textbox anyways
+            //guaranteed to be non-null since onActivityResult only imports if result ok
+            String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
+            DocumentFile tree = DocumentFile.fromTreeUri(context, Uri.parse(stickerDirPath));
+
+            DocumentFile[] files = tree.listFiles();
+
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isFile())
+                    stickersInDir += importSticker(files[i], "");
+                if (files[i].isDirectory())
+                    stickersInDir += importPack(files[i]);
+            }
+            return Integer.valueOf(stickersInDir);
+        }
+
+        /**
+         * Has to be in AsyncTask's onPostExecute() to update UI.
+         *
+         * @param result the number of stickers imported in doInBackground()
+         */
+        protected void onPostExecute(Integer result) {
+            Toast.makeText(getApplicationContext(),
+                    "Imported " + result.toString() + " stickers. You may need to reload the keyboard for new stickers to show up.",
+                    Toast.LENGTH_SHORT).show();
+
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt("numStickersImported", result.intValue());
+            editor.apply();
+            refreshStickerDirPath();
+
+            Button button = findViewById(R.id.chooseStickerDir);
+            button.setEnabled(true);
+        }
+
+        protected void onPreExecute() {
+            Toast.makeText(getApplicationContext(),
+                    "Starting import. You will not be able to reselect directory until finished. This might take a bit!",
+                    Toast.LENGTH_SHORT).show();
+            Button button = findViewById(R.id.chooseStickerDir);
+            button.setEnabled(false);
+        }
     }
 }
