@@ -12,7 +12,7 @@
         android:id="@+id/stickerDirStatusText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Current loaded sticker information:" />
+        android:text="@string/current_info" />
 
     <TextView
         android:id="@+id/stickerDirStatus"
@@ -24,8 +24,22 @@
         android:id="@+id/chooseStickerDir"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose a new sticker source directory"
+        android:text="@string/choose_dir"
         android:onClick="chooseDir" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:id="@+id/githubLink"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autoLink="web"
+        android:linksClickable="true"
+        android:text="@string/github" />
 
 
 </LinearLayout>
