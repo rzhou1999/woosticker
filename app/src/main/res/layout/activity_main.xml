@@ -12,7 +12,7 @@
         android:id="@+id/stickerDirStatusText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Current sticker directory:" />
+        android:text="Current loaded sticker information:" />
 
     <TextView
         android:id="@+id/stickerDirStatus"
@@ -26,13 +26,6 @@
         android:layout_height="wrap_content"
         android:text="Choose a new sticker source directory"
         android:onClick="chooseDir" />
-
-    <Button
-        android:id="@+id/importStickers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Import stickers to woosticker"
-        android:onClick="importStickers" />
 
 
 </LinearLayout>

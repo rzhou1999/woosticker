@@ -22,16 +22,6 @@ public class StickerPack {
     }
 
     /**
-     * Provides a sticker to use as the pack-nav container thumbnail.
-     * Currently just takes the first element, but could theoretically include any selection logic.
-     *
-     * @return File that should be used for thumbnail
-     */
-    public File getThumbSticker() {
-        return this.stickers[0];
-    }
-
-    /**
      * Note: When MainActivity copies files over, it filters out all non-supported files (i.e. any
      * file that is not supported as well as directories). Because of this there is no extra filter
      * in this function. The exception is the base directory, which is handled in the constructor.
@@ -40,5 +30,15 @@ public class StickerPack {
      */
     public File[] getStickerList() {
         return this.stickers;
+    }
+
+    /**
+     * Provides a sticker to use as the pack-nav container thumbnail.
+     * Currently just takes the first element, but could theoretically include any selection logic.
+     *
+     * @return File that should be used for thumbnail
+     */
+    public File getThumbSticker() {
+        return this.stickers[0];
     }
 }
