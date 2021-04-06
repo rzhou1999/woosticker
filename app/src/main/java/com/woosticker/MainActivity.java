@@ -128,7 +128,8 @@ public class MainActivity extends Activity {
 
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt("numStickersImported", stickersInDir);
-        editor.apply();
+        //If triggerRebirth() is used, need to synchronously write to persistent storage
+        editor.commit();
         refreshStickerDirPath();
 
         //Inelegant, but the easiest way I could guarantee the pack/image reloading to be triggered
