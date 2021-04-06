@@ -8,11 +8,11 @@ I am currently releasing woosticker through [GitHub releases](https://github.com
 
 ## Planned to-dos:
 
-* [x] ~~ Move file transfer to separate thread ~~
+* [x] ~~Move file transfer to separate thread~~
 * [ ] Find better way to reload from filesystem (how to trigger onCreate() programmatically?)
 * [ ] UI improvements + tutorial
 * [ ] Add more than just png and gif support
-* [ ]Clean up code + add javadoc documentation
+* [ ] Clean up code + add javadoc documentation
 * If there's something else you would like to see please submit an issue (no guarantees on when I'll get around to doing them however)
 
 
