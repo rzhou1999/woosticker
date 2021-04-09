@@ -6,6 +6,8 @@ The main difference between this app and uSticker is that uSticker piggybacks on
 
 I am currently releasing woosticker through [GitHub releases](https://github.com/rzhou1999/woosticker/releases) only-- I'd like to get to a point where I'm happy with the UI before I release to play store/fdroid. As such, you will likely get an installation warning when downloading and installing, which you will need to dismiss in order to use woosticker. You can also build the project manually to generate an .apk as well.
 
+Note that this is primarily a personal project, and the feature set will largely be determined by my own needs. I am happy to hear feedback (submit an Issue!) about the user experience and use-cases, but please understand if I cannot accomodate feature requests. If you feel strongly about a specific issue, please feel free to fork this project!
+
 ## Planned to-dos:
 
 * [x] ~~Move file transfer to separate thread~~
@@ -13,8 +15,11 @@ I am currently releasing woosticker through [GitHub releases](https://github.com
 * [ ] UI improvements + tutorial
 * [ ] Add more than just png and gif support
 * [ ] Clean up code + add javadoc documentation
-* If there's something else you would like to see please submit an issue (no guarantees on when I'll get around to doing them however)
+* [ ] If there's something else you would like to see please submit an issue (no guarantees on when I'll get around to doing them however)
 
+## Sticker-use disclaimer
+
+woosticker was intended to provide pseudo-sticker support for messaging apps that don't natively have their own implementation of stickers-- for example, Threema, XMPP, etc. allow text and image support, but do not have a native sticker store or the like. Unfortunately, this also means that there is no direct way to support artists and creators directly from woosticker itself, since the app is intended to treat images/folders and stickers/packs without any extra metadata. I highly encourage anyone who uses the artwork of others as a sticker to purchase the pack on existing sticker stores (such as LINE's sticker storefront) or in another way monetarily support the artists. I do not condone the usage of woosticker to sidestep the need to pay for an app's sticker packs/features.
 
 ## Screenshots
 
