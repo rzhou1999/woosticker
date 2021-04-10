@@ -19,7 +19,7 @@ Note that this is primarily a personal project, and the feature set will largely
 
 ## Sticker-use disclaimer
 
-woosticker was intended to provide pseudo-sticker support for messaging apps that don't natively have their own implementation of stickers-- for example, Threema, XMPP, etc. allow text and image support, but do not have a native sticker store or the like. Unfortunately, this also means that there is no direct way to support artists and creators directly from woosticker itself, since the app is intended to treat images/folders and stickers/packs without any extra metadata. I highly encourage anyone who uses the artwork of others as a sticker to purchase the pack on existing sticker stores (such as LINE's sticker storefront) or in another way monetarily support the artists. I do not condone the usage of woosticker to sidestep the need to pay for an app's sticker packs/features.
+woosticker was intended to provide pseudo-sticker support for messaging apps that don't natively have their own implementation of stickers-- for example, Threema, XMPP, etc. allow text and image support, but do not have a native sticker store or the like. Unfortunately, this also means that there is no direct way to support artists and creators directly from woosticker itself, since the app is intended to treat images/folders and stickers/packs without any extra metadata. I highly encourage anyone who uses the artwork of others as a sticker to purchase the pack on existing sticker stores (such as LINE's sticker storefront) or in another way monetarily support the artists. I do not condone the usage of woosticker to sidestep the need to pay for an app's existing sticker packs/features.
 
 ## Screenshots
 
