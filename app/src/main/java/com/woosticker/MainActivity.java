@@ -7,8 +7,11 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -142,9 +145,20 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         setContentView(R.layout.activity_main);
         refreshStickerDirPath();
+
+        Switch backButtonToggle = findViewById(R.id.backButtonToggle);
+        backButtonToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                showChangedPrefText();
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("showBackButton", isChecked);
+                editor.apply();
+            }
+        });
     }
 
     /**
@@ -158,6 +172,15 @@ public class MainActivity extends Activity {
         TextView dirStatus = findViewById(R.id.stickerDirStatus);
         dirStatus.setText(stickerDirPath + " on " + lastUpdateDate + " with " +
                 numStickersImported + " stickers loaded.");
+    }
+
+    /**
+     * Reusable function to warn about changing preferences
+     */
+    private void showChangedPrefText() {
+        Toast.makeText(getApplicationContext(),
+                "Preferences changed. You may need to reload the keyboard for settings to apply.",
+                Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -198,7 +221,7 @@ public class MainActivity extends Activity {
         protected void onPostExecute(Integer result) {
             Toast.makeText(getApplicationContext(),
                     "Imported " + result.toString() + " stickers. You may need to reload the keyboard for new stickers to show up.",
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
 
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putInt("numStickersImported", result.intValue());
@@ -212,7 +235,7 @@ public class MainActivity extends Activity {
         protected void onPreExecute() {
             Toast.makeText(getApplicationContext(),
                     "Starting import. You will not be able to reselect directory until finished. This might take a bit!",
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
             Button button = findViewById(R.id.chooseStickerDir);
             button.setEnabled(false);
         }

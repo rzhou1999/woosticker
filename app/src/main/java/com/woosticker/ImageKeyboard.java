@@ -4,16 +4,21 @@ import android.app.AppOpsManager;
 import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -23,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.FileProvider;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
@@ -31,6 +37,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import pl.droidsonroids.gif.GifDrawable;
@@ -46,6 +53,25 @@ public class ImageKeyboard extends InputMethodService {
     private LinearLayout ImageContainer;
     private LinearLayout PackContainer;
     private File INTERNAL_DIR;
+
+    private void addBackButtonToContainer() {
+        CardView PackCard = (CardView) getLayoutInflater().inflate(R.layout.pack_card, PackContainer, false);
+        ImageButton BackButton = PackCard.findViewById(R.id.ib3);
+
+        Resources res = this.getResources();
+        Drawable icon = ResourcesCompat.getDrawable(res, R.drawable.tabler_arrow_left_white, null);
+
+        BackButton.setImageDrawable(icon);
+        BackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InputMethodManager inputMethodManager = (InputMethodManager) getApplicationContext()
+                        .getSystemService(INPUT_METHOD_SERVICE);
+                inputMethodManager.showInputMethodPicker();
+            }
+        });
+        PackContainer.addView(PackCard);
+    }
 
     private void addPackToContainer(StickerPack pack) {
         CardView PackCard = (CardView) getLayoutInflater().inflate(R.layout.pack_card, PackContainer, false);
@@ -242,6 +268,12 @@ public class ImageKeyboard extends InputMethodService {
 
     private void recreatePackContainer() {
         PackContainer.removeAllViewsInLayout();
+
+        SharedPreferences sharedPref= PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        if (sharedPref.getBoolean("showBackButton", false)){
+            addBackButtonToContainer();
+        }
+
         String[] sortedPackNames = loadedPacks.keySet().toArray(new String[loadedPacks.size()]);
         Arrays.sort(sortedPackNames);
         for (int i = 0; i < sortedPackNames.length; i++) {
