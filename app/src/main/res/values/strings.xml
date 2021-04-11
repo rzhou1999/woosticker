@@ -3,4 +3,7 @@
     <string name="github">You are using a very early version of this app. The UI will remain minimal until I learn more about Android development and there may be performance issues/unintended behavior. Report issues, feedback, etc. on GitHub: https://github.com/rzhou1999/woosticker</string>
     <string name="choose_dir">Choose a new sticker source directory</string>
     <string name="current_info">Current loaded sticker information:</string>
+    <string name="showBackButton">Show back button in navbar?</string>
+    <string name="icons_per_row_status">Icons per row:</string>
+    <string name="icon_size_status">Icon size:</string>
 </resources>

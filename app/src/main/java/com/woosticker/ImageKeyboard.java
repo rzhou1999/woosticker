@@ -53,6 +53,9 @@ public class ImageKeyboard extends InputMethodService {
     private LinearLayout ImageContainer;
     private LinearLayout PackContainer;
     private File INTERNAL_DIR;
+    private int iconsPerRow;
+    private int iconSize;
+    private SharedPreferences sharedPref;
 
     private void addBackButtonToContainer() {
         CardView PackCard = (CardView) getLayoutInflater().inflate(R.layout.pack_card, PackContainer, false);
@@ -178,6 +181,11 @@ public class ImageKeyboard extends InputMethodService {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        this.sharedPref= PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        this.iconsPerRow = this.sharedPref.getInt("iconsPerRow", 3);
+        this.iconSize = sharedPref.getInt("iconSize", 160);
+
         reloadPacks();
     }
 
@@ -232,12 +240,14 @@ public class ImageKeyboard extends InputMethodService {
 
         File[] stickers = pack.getStickerList();
         for (int i = 0; i < stickers.length; i++) {
-            if ((i % 3) == 0) {
+            if ((i % this.iconsPerRow) == 0) {
                 ImageContainerColumn = (LinearLayout) getLayoutInflater().inflate(R.layout.image_container_column, ImageContainer, false);
             }
 
             CardView ImageCard = (CardView) getLayoutInflater().inflate(R.layout.sticker_card, ImageContainerColumn, false);
             ImageButton ImgButton = ImageCard.findViewById(R.id.ib3);
+            ImgButton.getLayoutParams().height = this.iconSize;
+            ImgButton.getLayoutParams().width = this.iconSize;
             ImgButton.setImageDrawable(getDrawableFromFile(stickers[i]));
             ImgButton.setTag(stickers[i]);
             ImgButton.setOnClickListener(new View.OnClickListener() {
@@ -260,7 +270,7 @@ public class ImageKeyboard extends InputMethodService {
 
             ImageContainerColumn.addView(ImageCard);
 
-            if ((i % 3) == 0) {
+            if ((i % this.iconsPerRow) == 0) {
                 ImageContainer.addView(ImageContainerColumn);
             }
         }
@@ -269,8 +279,7 @@ public class ImageKeyboard extends InputMethodService {
     private void recreatePackContainer() {
         PackContainer.removeAllViewsInLayout();
 
-        SharedPreferences sharedPref= PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        if (sharedPref.getBoolean("showBackButton", false)){
+        if (this.sharedPref.getBoolean("showBackButton", false)){
             addBackButtonToContainer();
         }
 

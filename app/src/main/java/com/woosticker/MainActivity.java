@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -148,8 +149,10 @@ public class MainActivity extends Activity {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         setContentView(R.layout.activity_main);
         refreshStickerDirPath();
+        refreshKeyboardConfig();
 
         Switch backButtonToggle = findViewById(R.id.backButtonToggle);
+        backButtonToggle.setChecked(sharedPref.getBoolean("showBackButton", false));
         backButtonToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -159,6 +162,65 @@ public class MainActivity extends Activity {
                 editor.apply();
             }
         });
+
+        final SeekBar iconsPerRowSeekBar = findViewById(R.id.iconsPerRowSeekBar);
+        iconsPerRowSeekBar.setProgress(sharedPref.getInt("iconsPerRow", 3));
+        iconsPerRowSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int iconsPerRow = 3;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                iconsPerRow = progress;
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Am I allowed to get rid of this somehow?
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putInt("iconsPerRow", iconsPerRow);
+                editor.apply();
+
+                refreshKeyboardConfig();
+                showChangedPrefText();
+            }
+        });
+
+        final SeekBar iconSizeSeekBar = findViewById(R.id.iconSizeSeekBar);
+        iconSizeSeekBar.setProgress(sharedPref.getInt("iconSize", 160) / 10);
+        iconSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int iconSize = 160;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                iconSize= progress * 10;
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // Am I allowed to get rid of this somehow?
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putInt("iconSize", iconSize);
+                editor.apply();
+
+                refreshKeyboardConfig();
+                showChangedPrefText();
+            }
+        });
+    }
+
+    /**
+     * Refreshes config from preferences
+     */
+    private void refreshKeyboardConfig() {
+        int iconsPerRow = sharedPref.getInt("iconsPerRow", 3);
+        TextView iconsPerRowValue = findViewById(R.id.iconsPerRowValue);
+        iconsPerRowValue.setText(String.valueOf(iconsPerRow));
+
+        int iconSize = sharedPref.getInt("iconSize", 160);
+        TextView iconSizeValue = findViewById(R.id.iconSizeValue);
+        iconSizeValue.setText(iconSize + " px");
     }
 
     /**
