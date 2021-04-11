@@ -59,7 +59,7 @@ public class ImageKeyboard extends InputMethodService {
         ImageButton BackButton = PackCard.findViewById(R.id.ib3);
 
         Resources res = this.getResources();
-        Drawable icon = ResourcesCompat.getDrawable(res, R.drawable.tabler_arrow_left_white, null);
+        Drawable icon = ResourcesCompat.getDrawable(res, R.drawable.tabler_icon_arrow_back_white, null);
 
         BackButton.setImageDrawable(icon);
         BackButton.setOnClickListener(new View.OnClickListener() {
@@ -219,7 +219,7 @@ public class ImageKeyboard extends InputMethodService {
         if (!allSupported) {
             Toast.makeText(getApplicationContext(),
                     "One or more image formats not supported here. Some stickers may not send correctly.",
-                    Toast.LENGTH_SHORT).show();
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -250,7 +250,7 @@ public class ImageKeyboard extends InputMethodService {
                     if (stickerType == null) {
                         Toast.makeText(getApplicationContext(),
                                 Utils.getFileExtension(file.getName()) + " not supported here.",
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_LONG).show();
                         return;
                     }
 
