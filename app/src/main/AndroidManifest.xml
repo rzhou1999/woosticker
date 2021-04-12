@@ -22,7 +22,6 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
-      <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
         <service
             android:name="com.woosticker.ImageKeyboard"
             android:label="WS Keyboard"
