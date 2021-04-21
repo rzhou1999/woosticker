@@ -33,7 +33,7 @@ allprojects {
 }
 
 
-wrapper{
+wrapper {
     gradleVersion = '4.1.3'
     distributionUrl = distributionUrl.replace("bin", "all")
 }

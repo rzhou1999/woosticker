@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -33,11 +32,13 @@ import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import pl.droidsonroids.gif.GifDrawable;
@@ -79,7 +80,8 @@ public class ImageKeyboard extends InputMethodService {
     private void addPackToContainer(StickerPack pack) {
         CardView PackCard = (CardView) getLayoutInflater().inflate(R.layout.pack_card, PackContainer, false);
         ImageButton PackButton = PackCard.findViewById(R.id.ib3);
-        PackButton.setImageDrawable(getDrawableFromPack(pack));
+        //PackButton.setImageDrawable(getDrawableFromPack(pack));
+        setPackButtonImage(pack, PackButton);
         PackButton.setTag(pack);
         PackButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,15 +135,23 @@ public class ImageKeyboard extends InputMethodService {
     private Drawable getDrawableFromFile(File sticker) {
         if (sticker.getName().contains(".gif")) {
             try {
-                GifDrawable gifFromAssets = new GifDrawable(sticker);
-                return gifFromAssets;
+                return new GifDrawable(sticker);
             } catch (Exception e) {
                 return null;
             }
         }
+        /*
+        if (sticker.getName().contains(".webp")) {
+            try {
+                return Glide.with(this).load(sticker.getAbsolutePath()).into();
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+         */
         try {
-            Drawable d = Drawable.createFromPath(sticker.getAbsolutePath());
-            return d;
+            return Drawable.createFromPath(sticker.getAbsolutePath());
         } catch (Exception e) {
             return null;
         }
@@ -149,6 +159,28 @@ public class ImageKeyboard extends InputMethodService {
 
     private Drawable getDrawableFromPack(StickerPack pack) {
         return getDrawableFromFile(pack.getThumbSticker());
+    }
+
+    private void setStickerButtonImage(File sticker, ImageButton btn) {
+        if (sticker.getName().contains(".gif")) {
+            try {
+                btn.setImageDrawable(new GifDrawable(sticker));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else if (sticker.getName().contains(".webp")) {
+            Glide.with(this).load(sticker.getAbsolutePath()).into(btn);
+
+        } else {
+            btn.setImageDrawable(Drawable.createFromPath(sticker.getAbsolutePath()));
+        }
+
+    }
+
+    private void setPackButtonImage(StickerPack pack, ImageButton btn) {
+        setStickerButtonImage(pack.getThumbSticker(), btn);
+
     }
 
     private boolean isCommitContentSupported(
@@ -182,7 +214,7 @@ public class ImageKeyboard extends InputMethodService {
     public void onCreate() {
         super.onCreate();
 
-        this.sharedPref= PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        this.sharedPref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         this.iconsPerRow = this.sharedPref.getInt("iconsPerRow", 3);
         this.iconSize = sharedPref.getInt("iconSize", 160);
 
@@ -248,7 +280,8 @@ public class ImageKeyboard extends InputMethodService {
             ImageButton ImgButton = ImageCard.findViewById(R.id.ib3);
             ImgButton.getLayoutParams().height = this.iconSize;
             ImgButton.getLayoutParams().width = this.iconSize;
-            ImgButton.setImageDrawable(getDrawableFromFile(stickers[i]));
+            //ImgButton.setImageDrawable(getDrawableFromFile(stickers[i]));
+            setStickerButtonImage(stickers[i], ImgButton);
             ImgButton.setTag(stickers[i]);
             ImgButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -279,7 +312,7 @@ public class ImageKeyboard extends InputMethodService {
     private void recreatePackContainer() {
         PackContainer.removeAllViewsInLayout();
 
-        if (this.sharedPref.getBoolean("showBackButton", false)){
+        if (this.sharedPref.getBoolean("showBackButton", false)) {
             addBackButtonToContainer();
         }
 
