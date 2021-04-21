@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -132,18 +131,11 @@ public class ImageKeyboard extends InputMethodService {
                 btn.setImageDrawable(new GifDrawable(sticker));
             } catch (IOException ignore) {
             }
-        } else if (sName.contains(".webp")) {
-            Glide.with(this).load(sticker.getAbsolutePath()).into(btn);
-        } else if (sName.contains(".apng") || sName.contains(".png")) {
-            Glide.with(this).load(sticker.getAbsolutePath()).into(btn);
+        } else if (sName.contains(".webp") || sName.contains(".apng") || sName.contains(".png")) {
+            Glide.with(this).asBitmap().load(sticker.getAbsolutePath()).into(btn);
         } else {
             btn.setImageDrawable(Drawable.createFromPath(sticker.getAbsolutePath()));
         }
-        Drawable drawable = btn.getDrawable();
-        if (drawable instanceof Animatable) {
-            ((Animatable) drawable).stop();
-        }
-
     }
 
     /**
