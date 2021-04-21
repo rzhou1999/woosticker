@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     /**
      * For each sticker, check if it is in a compatible file format with woosticker
      *
-     * @param sticker sticker to check compatability with woosticker for
+     * @param sticker sticker to check compatibility with woosticker for
      * @return true if supported image type
      */
     private boolean canImportSticker(DocumentFile sticker) {
@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
     /**
      * Called on button press to choose a new directory
      *
-     * @param view
+     * @param view: View
      */
     public void chooseDir(View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
@@ -78,8 +78,8 @@ public class MainActivity extends Activity {
     private int importPack(DocumentFile pack) {
         int stickersInPack = 0;
         DocumentFile[] stickers = pack.listFiles();
-        for (int i = 0; i < stickers.length; i++) {
-            stickersInPack += importSticker(stickers[i], pack.getName() + "/");
+        for (DocumentFile sticker : stickers) {
+            stickersInPack += importSticker(sticker, pack.getName() + "/");
         }
         return stickersInPack;
     }
@@ -192,7 +192,7 @@ public class MainActivity extends Activity {
             int iconSize = 160;
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                iconSize= progress * 10;
+                iconSize = progress * 10;
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -220,7 +220,7 @@ public class MainActivity extends Activity {
 
         int iconSize = sharedPref.getInt("iconSize", 160);
         TextView iconSizeValue = findViewById(R.id.iconSizeValue);
-        iconSizeValue.setText(iconSize + " px");
+        iconSizeValue.setText(String.format("%d px", iconSize));
     }
 
     /**
@@ -232,8 +232,7 @@ public class MainActivity extends Activity {
         int numStickersImported = sharedPref.getInt("numStickersImported", 0);
 
         TextView dirStatus = findViewById(R.id.stickerDirStatus);
-        dirStatus.setText(stickerDirPath + " on " + lastUpdateDate + " with " +
-                numStickersImported + " stickers loaded.");
+        dirStatus.setText(String.format("%s on %s with %d stickers loaded.", stickerDirPath, lastUpdateDate, numStickersImported));
     }
 
     /**
@@ -264,15 +263,16 @@ public class MainActivity extends Activity {
             String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
             DocumentFile tree = DocumentFile.fromTreeUri(context, Uri.parse(stickerDirPath));
 
+            assert tree != null;
             DocumentFile[] files = tree.listFiles();
 
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isFile())
-                    stickersInDir += importSticker(files[i], "");
-                if (files[i].isDirectory())
-                    stickersInDir += importPack(files[i]);
+            for (DocumentFile file : files) {
+                if (file.isFile())
+                    stickersInDir += importSticker(file, "");
+                if (file.isDirectory())
+                    stickersInDir += importPack(file);
             }
-            return Integer.valueOf(stickersInDir);
+            return stickersInDir;
         }
 
         /**
@@ -286,7 +286,7 @@ public class MainActivity extends Activity {
                     Toast.LENGTH_LONG).show();
 
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putInt("numStickersImported", result.intValue());
+            editor.putInt("numStickersImported", result);
             editor.apply();
             refreshStickerDirPath();
 
