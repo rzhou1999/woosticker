@@ -163,6 +163,18 @@ public class MainActivity extends Activity {
             }
         });
 
+        Switch animateGlide = findViewById(R.id.animateGlide);
+        animateGlide.setChecked(sharedPref.getBoolean("animateGlide", false));
+        animateGlide.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                showChangedPrefText();
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean("animateGlide", isChecked);
+                editor.apply();
+            }
+        });
+
         final SeekBar iconsPerRowSeekBar = findViewById(R.id.iconsPerRowSeekBar);
         iconsPerRowSeekBar.setProgress(sharedPref.getInt("iconsPerRow", 3));
         iconsPerRowSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -173,14 +185,14 @@ public class MainActivity extends Activity {
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Am I allowed to get rid of this somehow?
+                // Am I allowed to get rid of this somehow? <- No cos the function is required by
+                // OnSeekBarChangeListener even if we do nothing
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt("iconsPerRow", iconsPerRow);
                 editor.apply();
-
                 refreshKeyboardConfig();
                 showChangedPrefText();
             }
@@ -203,7 +215,6 @@ public class MainActivity extends Activity {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt("iconSize", iconSize);
                 editor.apply();
-
                 refreshKeyboardConfig();
                 showChangedPrefText();
             }

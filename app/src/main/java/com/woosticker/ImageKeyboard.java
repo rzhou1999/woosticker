@@ -33,6 +33,7 @@ import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -132,7 +133,11 @@ public class ImageKeyboard extends InputMethodService {
             } catch (IOException ignore) {
             }
         } else if (sName.contains(".webp") || sName.contains(".apng") || sName.contains(".png")) {
-            Glide.with(this).asBitmap().load(sticker.getAbsolutePath()).into(btn);
+            if (this.sharedPref.getBoolean("animateGlide", false)) {
+                Glide.with(this).load(sticker.getAbsolutePath()).diskCacheStrategy(DiskCacheStrategy.NONE).into(btn);
+            } else {
+                Glide.with(this).asBitmap().load(sticker.getAbsolutePath()).into(btn);
+            }
         } else {
             btn.setImageDrawable(Drawable.createFromPath(sticker.getAbsolutePath()));
         }
