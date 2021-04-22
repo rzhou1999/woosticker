@@ -3,7 +3,6 @@ package com.woosticker;
 import android.app.AppOpsManager;
 import android.content.ClipDescription;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -97,26 +96,14 @@ public class ImageKeyboard extends InputMethodService {
                                  @NonNull File file) {
         final EditorInfo editorInfo = getCurrentInputEditorInfo();
         final Uri contentUri = FileProvider.getUriForFile(this, AUTHORITY, file);
-        // On API 24 and prior devices, we cannot rely on
-        // InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION. You as an IME author
-        // need to decide what access control is needed (or not needed) for content URIs that
-        // you are going to expose. This sample uses Context.grantUriPermission(), but you can
-        // implement your own mechanism that satisfies your own requirements.
-        try {
-            grantUriPermission(
-                    editorInfo.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        } catch (Exception e) {
-            Log.e(TAG, "grantUriPermission failed packageName=" + editorInfo.packageName
-                    + " contentUri=" + contentUri, e);
-        }
-
+        final int flag = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
         final InputContentInfoCompat inputContentInfoCompat = new InputContentInfoCompat(
                 contentUri,
                 new ClipDescription(description, new String[]{mimeType}),
                 null);
         InputConnectionCompat.commitContent(
                 getCurrentInputConnection(), getCurrentInputEditorInfo(), inputContentInfoCompat,
-                0, null);
+                flag, null);
     }
 
     /**
