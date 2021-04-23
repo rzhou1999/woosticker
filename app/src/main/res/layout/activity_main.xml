@@ -34,14 +34,13 @@
         />
 
     <View
-        android:id="@+id/divider2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"
         style="@style/widget"
         />
 
-    <Switch
+    <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/backButtonToggle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,7 +48,7 @@
         style="@style/widget"
         />
 
-    <Switch
+    <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/animateGlide"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,7 +64,6 @@
         >
 
         <TextView
-            android:id="@+id/iconsPerRowStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/icons_per_row_status" />
@@ -93,7 +91,6 @@
         >
 
         <TextView
-            android:id="@+id/iconSizeStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/icon_size_status" />
@@ -114,7 +111,6 @@
     </LinearLayout>
 
     <View
-        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"
@@ -122,7 +118,6 @@
         />
 
     <TextView
-        android:id="@+id/githubLink"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autoLink="web"
