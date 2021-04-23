@@ -16,9 +16,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.documentfile.provider.DocumentFile;
-
-import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.io.File;
 import java.io.IOException;
@@ -155,7 +154,7 @@ public class MainActivity extends Activity {
         refreshStickerDirPath();
         refreshKeyboardConfig();
 
-        SwitchMaterial backButtonToggle = findViewById(R.id.backButtonToggle);
+        SwitchCompat backButtonToggle = findViewById(R.id.backButtonToggle);
         backButtonToggle.setChecked(sharedPref.getBoolean("showBackButton", false));
         backButtonToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             showChangedPrefText();
@@ -164,12 +163,12 @@ public class MainActivity extends Activity {
             editor.apply();
         });
 
-        SwitchMaterial animateGlide = findViewById(R.id.animateGlide);
-        animateGlide.setChecked(sharedPref.getBoolean("animateGlide", false));
-        animateGlide.setOnCheckedChangeListener((buttonView, isChecked) -> {
+        SwitchCompat disableAnimations = findViewById(R.id.disable_animations);
+        disableAnimations.setChecked(sharedPref.getBoolean("disable_animations", false));
+        disableAnimations.setOnCheckedChangeListener((buttonView, isChecked) -> {
             showChangedPrefText();
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("animateGlide", isChecked);
+            editor.putBoolean("disable_animations", isChecked);
             editor.apply();
         });
 

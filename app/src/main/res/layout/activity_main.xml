@@ -1,67 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    >
+    android:paddingRight="16dp">
 
     <TextView
         android:id="@+id/stickerDirStatusText"
+        style="@style/widget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/current_info"
-        style="@style/widget"
-        />
+        android:text="@string/current_info" />
 
     <TextView
         android:id="@+id/stickerDirStatus"
+        style="@style/widget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
-        style="@style/widget"
-        />
+        android:text="" />
 
     <Button
         android:id="@+id/chooseStickerDir"
+        style="@style/widget"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/choose_dir"
         android:onClick="chooseDir"
-        style="@style/widget"
-        />
+        android:text="@string/choose_dir" />
 
     <View
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        style="@style/widget"
-        />
+        android:background="?android:attr/listDivider" />
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/backButtonToggle"
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/showBackButton"
-        style="@style/widget"
-        />
+        android:text="@string/showBackButton" />
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/animateGlide"
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/disable_animations"
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/animateGlide"
-        style="@style/widget"
-        />
+        android:text="@string/disable_animations" />
 
     <LinearLayout
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="@style/widget"
-        >
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
@@ -79,16 +71,15 @@
             android:layout_height="wrap_content"
             android:max="10"
             android:min="1"
-            android:progress="4"/>
+            android:progress="4" />
 
     </LinearLayout>
 
     <LinearLayout
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="@style/widget"
-        >
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
@@ -106,24 +97,22 @@
             android:layout_height="wrap_content"
             android:max="32"
             android:min="8"
-            android:progress="16"/>
+            android:progress="16" />
 
     </LinearLayout>
 
     <View
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        style="@style/widget"
-        />
+        android:background="?android:attr/listDivider" />
 
     <TextView
+        style="@style/widget"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autoLink="web"
         android:linksClickable="true"
-        android:text="@string/github"
-        style="@style/widget"
-        />
+        android:text="@string/github" />
 
 </LinearLayout>

@@ -2,6 +2,8 @@ package com.woosticker;
 
 import android.content.ClipDescription;
 import android.content.SharedPreferences;
+import android.graphics.ImageDecoder;
+import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -24,8 +26,7 @@ import androidx.core.view.inputmethod.EditorInfoCompat;
 import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.github.penfeizhou.animation.apng.APNGDrawable;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +34,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import pl.droidsonroids.gif.GifDrawable;
 
 
 public class ImageKeyboard extends InputMethodService {
@@ -111,20 +110,21 @@ public class ImageKeyboard extends InputMethodService {
      */
     private void setStickerButtonImage(File sticker, ImageButton btn) {
         String sName = sticker.getName();
-        if (sticker.getName().contains(".gif")) {
-            try {
-                btn.setImageDrawable(new GifDrawable(sticker));
-            } catch (IOException ignore) {
-            }
-        } else if (sName.contains(".webp") || sName.contains(".apng") || sName.contains(".png")) {
-            if (sharedPref.getBoolean("animateGlide", false)) {
-                Glide.with(this).load(sticker.getAbsolutePath()).diskCacheStrategy(DiskCacheStrategy.NONE).into(btn);
-            } else {
-                Glide.with(this).asBitmap().load(sticker.getAbsolutePath()).into(btn);
-            }
-        } else {
-            btn.setImageDrawable(Drawable.createFromPath(sticker.getAbsolutePath()));
+        // Create drawable from file
+        Drawable drawable = null;
+        try {
+            drawable = ImageDecoder.decodeDrawable(ImageDecoder.createSource(sticker));
+        } catch (IOException ignore) {
         }
+        if (sName.contains(".png") || sName.contains(".apng")) {
+            drawable = APNGDrawable.fromFile(sticker.getAbsolutePath());
+        }
+        // Disable animations?
+        if (drawable instanceof AnimatedImageDrawable && !sharedPref.getBoolean("disable_animations", false)) {
+            ((AnimatedImageDrawable) drawable).start();
+        }
+        // Apply
+        btn.setImageDrawable(drawable);
     }
 
     /**
