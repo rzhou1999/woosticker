@@ -118,10 +118,15 @@ public class ImageKeyboard extends InputMethodService {
         }
         if (sName.contains(".png") || sName.contains(".apng")) {
             drawable = APNGDrawable.fromFile(sticker.getAbsolutePath());
+            ((APNGDrawable) drawable).setAutoPlay(false);
+            ((APNGDrawable) drawable).start();
         }
         // Disable animations?
         if (drawable instanceof AnimatedImageDrawable && !sharedPref.getBoolean("disable_animations", false)) {
             ((AnimatedImageDrawable) drawable).start();
+        }
+        if (drawable instanceof APNGDrawable && sharedPref.getBoolean("disable_animations", false)) {
+            ((APNGDrawable) drawable).stop();
         }
         // Apply
         btn.setImageDrawable(drawable);
