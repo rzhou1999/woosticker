@@ -10,13 +10,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
@@ -26,30 +26,31 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class MainActivity extends Activity {
     private final int CHOOSE_STICKER_DIR = 62519;
     private final HashMap<String, String> SUPPORTED_MIMES = Utils.get_supported_mimes();
-    private SharedPreferences sharedPref = null;
+    SharedPreferences sharedPref = null;
 
     /**
      * For each sticker, check if it is in a compatible file format with woosticker
      *
-     * @param sticker sticker to check compatability with woosticker for
+     * @param sticker sticker to check compatibility with woosticker for
      * @return true if supported image type
      */
     private boolean canImportSticker(DocumentFile sticker) {
-        ArrayList<String> mimesToCheck = new ArrayList<String>(SUPPORTED_MIMES.keySet());
+        ArrayList<String> mimesToCheck = new ArrayList<>(SUPPORTED_MIMES.keySet());
         return !(sticker.isDirectory() ||
-                !mimesToCheck.contains(Utils.getFileExtension(sticker.getName())));
+                !mimesToCheck.contains(Utils.getFileExtension(Objects.requireNonNull(sticker.getName()))));
     }
 
     /**
      * Called on button press to choose a new directory
      *
-     * @param view
+     * @param view: View
      */
-    public void chooseDir(View view) {
+    public void chooseDir(@NonNull View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
@@ -61,9 +62,9 @@ public class MainActivity extends Activity {
      *
      * @param fileOrDirectory File to start deleting from
      */
-    private void deleteRecursive(File fileOrDirectory) {
+    void deleteRecursive(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory()) {
-            for (File child : fileOrDirectory.listFiles()) {
+            for (File child : Objects.requireNonNull(fileOrDirectory.listFiles())) {
                 deleteRecursive(child);
             }
         }
@@ -75,11 +76,11 @@ public class MainActivity extends Activity {
      *
      * @param pack source pack
      */
-    private int importPack(DocumentFile pack) {
+    int importPack(DocumentFile pack) {
         int stickersInPack = 0;
         DocumentFile[] stickers = pack.listFiles();
-        for (int i = 0; i < stickers.length; i++) {
-            stickersInPack += importSticker(stickers[i], pack.getName() + "/");
+        for (DocumentFile sticker : stickers) {
+            stickersInPack += importSticker(sticker, pack.getName() + "/");
         }
         return stickersInPack;
     }
@@ -90,13 +91,15 @@ public class MainActivity extends Activity {
      * @param sticker sticker to copy over
      * @param pack    the pack which the sticker belongs to
      */
-    private int importSticker(DocumentFile sticker, String pack) {
+    int importSticker(DocumentFile sticker, String pack) {
         if (!canImportSticker(sticker)) {
             return 0;
         }
         //this path business is a little icky....
         File destSticker = new File(getFilesDir(), "stickers/" + pack + sticker.getName());
-        destSticker.getParentFile().mkdirs();
+        if (destSticker.getParentFile() != null) {
+            destSticker.getParentFile().mkdirs(); // Protect against null pointer exception
+        }
         try {
             InputStream is = getContentResolver().openInputStream(sticker.getUri());
             Files.copy(is, destSticker.toPath());
@@ -119,12 +122,12 @@ public class MainActivity extends Activity {
     /**
      * Handles ACTION_OPEN_DOCUMENT_TREE result and adds the returned Uri to shared prefs
      *
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * @param requestCode Int - RequestCode as defined under the Activity private vars
+     * @param resultCode  Int - The result code, we only want to do stuff if successful
+     * @param data        Intent? - Extra data in the form of an intent. tend to access .data
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_STICKER_DIR && resultCode == Activity.RESULT_OK) {
             if (data != null) {
@@ -141,7 +144,7 @@ public class MainActivity extends Activity {
     /**
      * Sets up content view, shared prefs, etc.
      *
-     * @param savedInstanceState
+     * @param savedInstanceState saved state
      */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -151,16 +154,22 @@ public class MainActivity extends Activity {
         refreshStickerDirPath();
         refreshKeyboardConfig();
 
-        Switch backButtonToggle = findViewById(R.id.backButtonToggle);
+        SwitchCompat backButtonToggle = findViewById(R.id.backButtonToggle);
         backButtonToggle.setChecked(sharedPref.getBoolean("showBackButton", false));
-        backButtonToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                showChangedPrefText();
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putBoolean("showBackButton", isChecked);
-                editor.apply();
-            }
+        backButtonToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            showChangedPrefText();
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("showBackButton", isChecked);
+            editor.apply();
+        });
+
+        SwitchCompat disableAnimations = findViewById(R.id.disable_animations);
+        disableAnimations.setChecked(sharedPref.getBoolean("disable_animations", false));
+        disableAnimations.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            showChangedPrefText();
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean("disable_animations", isChecked);
+            editor.apply();
         });
 
         final SeekBar iconsPerRowSeekBar = findViewById(R.id.iconsPerRowSeekBar);
@@ -173,14 +182,12 @@ public class MainActivity extends Activity {
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Am I allowed to get rid of this somehow?
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt("iconsPerRow", iconsPerRow);
                 editor.apply();
-
                 refreshKeyboardConfig();
                 showChangedPrefText();
             }
@@ -192,18 +199,16 @@ public class MainActivity extends Activity {
             int iconSize = 160;
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                iconSize= progress * 10;
+                iconSize = progress * 10;
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
-                // Am I allowed to get rid of this somehow?
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt("iconSize", iconSize);
                 editor.apply();
-
                 refreshKeyboardConfig();
                 showChangedPrefText();
             }
@@ -213,33 +218,32 @@ public class MainActivity extends Activity {
     /**
      * Refreshes config from preferences
      */
-    private void refreshKeyboardConfig() {
+    void refreshKeyboardConfig() {
         int iconsPerRow = sharedPref.getInt("iconsPerRow", 3);
         TextView iconsPerRowValue = findViewById(R.id.iconsPerRowValue);
         iconsPerRowValue.setText(String.valueOf(iconsPerRow));
 
         int iconSize = sharedPref.getInt("iconSize", 160);
         TextView iconSizeValue = findViewById(R.id.iconSizeValue);
-        iconSizeValue.setText(iconSize + " px");
+        iconSizeValue.setText(String.format("%d px", iconSize));
     }
 
     /**
      * Rereads saved sticker dir path from preferences
      */
-    private void refreshStickerDirPath() {
+    void refreshStickerDirPath() {
         String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
         String lastUpdateDate = sharedPref.getString("lastUpdateDate", "never");
         int numStickersImported = sharedPref.getInt("numStickersImported", 0);
 
         TextView dirStatus = findViewById(R.id.stickerDirStatus);
-        dirStatus.setText(stickerDirPath + " on " + lastUpdateDate + " with " +
-                numStickersImported + " stickers loaded.");
+        dirStatus.setText(String.format("%s on %s with %d stickers loaded.", stickerDirPath, lastUpdateDate, numStickersImported));
     }
 
     /**
      * Reusable function to warn about changing preferences
      */
-    private void showChangedPrefText() {
+    void showChangedPrefText() {
         Toast.makeText(getApplicationContext(),
                 "Preferences changed. You may need to reload the keyboard for settings to apply.",
                 Toast.LENGTH_LONG).show();
@@ -248,7 +252,7 @@ public class MainActivity extends Activity {
     /**
      * AsyncTask to handle file copying
      */
-    private class FSCopyTask extends AsyncTask<Context, Void, Integer> {
+    class FSCopyTask extends AsyncTask<Context, Void, Integer> {
 
         /**
          * @param params should include a single Context
@@ -264,15 +268,16 @@ public class MainActivity extends Activity {
             String stickerDirPath = sharedPref.getString("stickerDirPath", "none set");
             DocumentFile tree = DocumentFile.fromTreeUri(context, Uri.parse(stickerDirPath));
 
+            assert tree != null;
             DocumentFile[] files = tree.listFiles();
 
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isFile())
-                    stickersInDir += importSticker(files[i], "");
-                if (files[i].isDirectory())
-                    stickersInDir += importPack(files[i]);
+            for (DocumentFile file : files) {
+                if (file.isFile())
+                    stickersInDir += importSticker(file, "");
+                if (file.isDirectory())
+                    stickersInDir += importPack(file);
             }
-            return Integer.valueOf(stickersInDir);
+            return stickersInDir;
         }
 
         /**
@@ -286,7 +291,7 @@ public class MainActivity extends Activity {
                     Toast.LENGTH_LONG).show();
 
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putInt("numStickersImported", result.intValue());
+            editor.putInt("numStickersImported", result);
             editor.apply();
             refreshStickerDirPath();
 

@@ -1,7 +1,8 @@
 package com.woosticker;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
-import java.io.FileFilter;
 
 /**
  * Helper class to provide pack-related information
@@ -10,15 +11,10 @@ import java.io.FileFilter;
 public class StickerPack {
     private final File[] stickers;
 
-    public StickerPack(File packDir) {
+    public StickerPack(@NonNull File packDir) {
         // Need to filter out directories because the base directory has to have other packs'
         // directories.
-        this.stickers = packDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile();
-            }
-        });
+        stickers = packDir.listFiles(File::isFile);
     }
 
     /**
@@ -28,8 +24,9 @@ public class StickerPack {
      *
      * @return Array of Files corresponding to all stickers found in this pack
      */
+    @NonNull
     public File[] getStickerList() {
-        return this.stickers;
+        return stickers;
     }
 
     /**
@@ -38,7 +35,8 @@ public class StickerPack {
      *
      * @return File that should be used for thumbnail
      */
+    @NonNull
     public File getThumbSticker() {
-        return this.stickers[0];
+        return stickers[0];
     }
 }

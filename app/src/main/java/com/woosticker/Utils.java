@@ -1,5 +1,7 @@
 package com.woosticker;
 
+import androidx.annotation.NonNull;
+
 import java.util.HashMap;
 
 /**
@@ -12,7 +14,8 @@ public final class Utils {
      *             .getName() on both, but they are different classes.
      * @return returns "." inclusive file extension.
      */
-    public static String getFileExtension(String name) {
+    @NonNull
+    public static String getFileExtension(@NonNull String name) {
         int lastIndexOf = name.lastIndexOf(".");
         if (lastIndexOf == -1) {
             return "";
@@ -26,10 +29,12 @@ public final class Utils {
      *
      * @return HashMap of woosticker-supported mimes. Keys are "." inclusive.
      */
+    @NonNull
     public static HashMap<String, String> get_supported_mimes() {
         return new HashMap<String, String>() {{
             put(".gif", "image/gif");
             put(".png", "image/png");
+            put(".apng", "image/png");
             put(".jpg", "image/jpg");
             put(".webp", "image/webp");
         }};
