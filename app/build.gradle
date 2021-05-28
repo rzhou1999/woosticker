@@ -135,24 +135,13 @@ android {
 }
 
 
-// Deps versions
-def GLIDE_VERSION = "4.12.0"
-def APNG_VERSION = "2.10.0"
-
-
 dependencies {
     implementation "androidx.cardview:cardview:1.0.0"
-    implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.22'
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    // webpdecoder
-    implementation "com.github.zjupure:webpdecoder:2.0.${GLIDE_VERSION}"
-    // glide
-    implementation "com.github.bumptech.glide:glide:${GLIDE_VERSION}"
-    annotationProcessor "com.github.bumptech.glide:compiler:${GLIDE_VERSION}"
+    implementation fileTree(dir: "libs", include: ["*.jar"])
     // apng
-    implementation "com.github.penfeizhou.android.animation:apng:${APNG_VERSION}"
+    implementation "com.github.penfeizhou.android.animation:apng:2.10.0"
 }
 
 // Run this once to be able to run the application with BUCK
