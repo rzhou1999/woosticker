@@ -3,7 +3,6 @@ package com.woosticker;
 import android.app.AppOpsManager;
 import android.content.ClipDescription;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -33,6 +32,7 @@ import androidx.core.view.inputmethod.InputConnectionCompat;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -80,7 +80,6 @@ public class ImageKeyboard extends InputMethodService {
     private void addPackToContainer(StickerPack pack) {
         CardView PackCard = (CardView) getLayoutInflater().inflate(R.layout.pack_card, PackContainer, false);
         ImageButton PackButton = PackCard.findViewById(R.id.ib3);
-        //PackButton.setImageDrawable(getDrawableFromPack(pack));
         setPackButtonImage(pack, PackButton);
         PackButton.setTag(pack);
         PackButton.setOnClickListener(new View.OnClickListener() {
@@ -95,34 +94,9 @@ public class ImageKeyboard extends InputMethodService {
 
     private void doCommitContent(@NonNull String description, @NonNull String mimeType,
                                  @NonNull File file) {
-
         final EditorInfo editorInfo = getCurrentInputEditorInfo();
-
         final Uri contentUri = FileProvider.getUriForFile(this, AUTHORITY, file);
-
-        final int flag;
-        if (Build.VERSION.SDK_INT >= 25) {
-            // On API 25 and later devices, as an analogy of Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            // you can specify InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION to give
-            // a temporary read access to the recipient application without exporting your content
-            // provider.
-            flag = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
-        } else {
-            // On API 24 and prior devices, we cannot rely on
-            // InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION. You as an IME author
-            // need to decide what access control is needed (or not needed) for content URIs that
-            // you are going to expose. This sample uses Context.grantUriPermission(), but you can
-            // implement your own mechanism that satisfies your own requirements.
-            flag = 0;
-            try {
-                grantUriPermission(
-                        editorInfo.packageName, contentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            } catch (Exception e) {
-                Log.e(TAG, "grantUriPermission failed packageName=" + editorInfo.packageName
-                        + " contentUri=" + contentUri, e);
-            }
-        }
-
+        final int flag = InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION;
         final InputContentInfoCompat inputContentInfoCompat = new InputContentInfoCompat(
                 contentUri,
                 new ClipDescription(description, new String[]{mimeType}),
@@ -132,57 +106,48 @@ public class ImageKeyboard extends InputMethodService {
                 flag, null);
     }
 
-    private Drawable getDrawableFromFile(File sticker) {
-        if (sticker.getName().contains(".gif")) {
-            try {
-                return new GifDrawable(sticker);
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        /*
-        if (sticker.getName().contains(".webp")) {
-            try {
-                return Glide.with(this).load(sticker.getAbsolutePath()).into();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-
-         */
-        try {
-            return Drawable.createFromPath(sticker.getAbsolutePath());
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Drawable getDrawableFromPack(StickerPack pack) {
-        return getDrawableFromFile(pack.getThumbSticker());
-    }
-
+    /**
+     * Apply a sticker file to the image button
+     *
+     * @param sticker: File - the file object representing the sticker
+     * @param btn:     ImageButton - the button
+     */
     private void setStickerButtonImage(File sticker, ImageButton btn) {
+        String sName = sticker.getName();
         if (sticker.getName().contains(".gif")) {
             try {
                 btn.setImageDrawable(new GifDrawable(sticker));
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ignore) {
             }
-
-        } else if (sticker.getName().contains(".webp")) {
-            Glide.with(this).load(sticker.getAbsolutePath()).into(btn);
-
+        } else if (sName.contains(".webp") || sName.contains(".apng") || sName.contains(".png")) {
+            if (this.sharedPref.getBoolean("animateGlide", false)) {
+                Glide.with(this).load(sticker.getAbsolutePath()).diskCacheStrategy(DiskCacheStrategy.NONE).into(btn);
+            } else {
+                Glide.with(this).asBitmap().load(sticker.getAbsolutePath()).into(btn);
+            }
         } else {
             btn.setImageDrawable(Drawable.createFromPath(sticker.getAbsolutePath()));
         }
-
     }
 
+    /**
+     * Apply a sticker the the pack icon (imagebutton)
+     *
+     * @param pack: StickerPack - the stickerpack to grab the pack icon from
+     * @param btn:  ImageButton - the button
+     */
     private void setPackButtonImage(StickerPack pack, ImageButton btn) {
         setStickerButtonImage(pack.getThumbSticker(), btn);
 
     }
 
+    /**
+     * Check if the sticker is supported by the reciever
+     *
+     * @param editorInfo: EditorInfo - the editor/ receiver
+     * @param mimeType:   String - the image mimetype
+     * @return: boolean - is the mimetype supported?
+     */
     private boolean isCommitContentSupported(
             @Nullable EditorInfo editorInfo, @NonNull String mimeType) {
 
@@ -280,7 +245,6 @@ public class ImageKeyboard extends InputMethodService {
             ImageButton ImgButton = ImageCard.findViewById(R.id.ib3);
             ImgButton.getLayoutParams().height = this.iconSize;
             ImgButton.getLayoutParams().width = this.iconSize;
-            //ImgButton.setImageDrawable(getDrawableFromFile(stickers[i]));
             setStickerButtonImage(stickers[i], ImgButton);
             ImgButton.setTag(stickers[i]);
             ImgButton.setOnClickListener(new View.OnClickListener() {

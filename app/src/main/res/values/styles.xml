@@ -5,4 +5,8 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="widget">
+        <item name="android:padding">8dp</item>
+    </style>
+
 </resources>

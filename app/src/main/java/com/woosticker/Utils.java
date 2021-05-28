@@ -30,6 +30,7 @@ public final class Utils {
         return new HashMap<String, String>() {{
             put(".gif", "image/gif");
             put(".png", "image/png");
+            put(".apng", "image/png");
             put(".jpg", "image/jpg");
             put(".webp", "image/webp");
         }};
