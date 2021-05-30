@@ -2,6 +2,7 @@ package com.woosticker;
 
 import android.content.ClipDescription;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,6 +30,7 @@ import androidx.core.view.inputmethod.InputContentInfoCompat;
 import com.github.penfeizhou.animation.apng.APNGDrawable;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -82,6 +84,33 @@ public class ImageKeyboard extends InputMethodService {
             recreateImageContainer((StickerPack) view.getTag());
         });
         PackContainer.addView(PackCard);
+    }
+
+
+    /**
+     * In the event that a mimetype is unsupported by a InputConnectionCompat (looking at you, Signal)
+     * Create a temporary png and send that. In the event that png is not supported, create a toast as before
+     *
+     * @param file: File
+     */
+    private void doFallbackCommitContent(@NonNull File file) {
+        // PNG might not be supported so fallback to toast
+        if (SUPPORTED_MIMES.get(".png") == null) {
+            Toast.makeText(getApplicationContext(), Utils.getFileExtension(file.getName()) +
+                    " not supported here.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // Create a new compatSticker and convert the sticker to png
+        File compatSticker = new File(getFilesDir(), "stickers/__compatSticker__/__compatSticker__.png");
+        if (compatSticker.getParentFile() != null) {
+            compatSticker.getParentFile().mkdirs(); // Protect against null pointer exception
+        }
+        try {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(file)).compress(Bitmap.CompressFormat.PNG, 90, new FileOutputStream(compatSticker));
+        } catch (IOException ignore) {
+        }
+        // Send the compatSticker!
+        doCommitContent("description", "image/png", compatSticker);
     }
 
     /**
@@ -250,9 +279,7 @@ public class ImageKeyboard extends InputMethodService {
                 String stickerType = SUPPORTED_MIMES.get(Utils.getFileExtension(file.getName()));
 
                 if (stickerType == null) {
-                    Toast.makeText(getApplicationContext(),
-                            Utils.getFileExtension(file.getName()) + " not supported here.",
-                            Toast.LENGTH_LONG).show();
+                    doFallbackCommitContent(file);
                     return;
                 }
 
