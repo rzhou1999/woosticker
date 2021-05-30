@@ -10,13 +10,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
         refreshStickerDirPath();
         refreshKeyboardConfig();
 
-        SwitchCompat backButtonToggle = findViewById(R.id.backButtonToggle);
+        CompoundButton backButtonToggle = findViewById(R.id.backButtonToggle);
         backButtonToggle.setChecked(sharedPref.getBoolean("showBackButton", false));
         backButtonToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
             showChangedPrefText();
@@ -163,7 +163,7 @@ public class MainActivity extends Activity {
             editor.apply();
         });
 
-        SwitchCompat disableAnimations = findViewById(R.id.disable_animations);
+        CompoundButton disableAnimations = findViewById(R.id.disableAnimations);
         disableAnimations.setChecked(sharedPref.getBoolean("disable_animations", false));
         disableAnimations.setOnCheckedChangeListener((buttonView, isChecked) -> {
             showChangedPrefText();
