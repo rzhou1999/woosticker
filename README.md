@@ -1,3 +1,7 @@
+# THIS PROJECT IS ON INDEFINITE HIATUS
+
+I currently have neither the time nor interest to further develop this app. Please visit https://github.com/FredHappyface/Android.EweSticker for a more actively maintained fork of this project. Comments and PRs will not be answered.
+
 # woosticker
 
 It's like [uSticker](https://github.com/apsun/uSticker) except with exceptionally worse programming. Code is not anywhere near publishable state, but app is functional at the least so I thought I would share.
